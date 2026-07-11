@@ -639,7 +639,7 @@
         seq.t = 0;
         seq.startX = seq.fx;
         seq.startY = seq.fy;
-        sfx("abduct");
+        sfx("beam");
       }
     } else if (seq.phase === "pull") {
       // ~2.0s: dragged up the beam, white → red (classic)
