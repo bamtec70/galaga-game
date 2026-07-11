@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#000008" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <title>GALAGA — Namco 1981</title>
+  <link rel="stylesheet" href="style.css?v=1" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <div id="game-wrapper">
+    <header id="hud">
+      <div class="hud-block">
+        <div class="label">1UP</div>
+        <div id="score">00</div>
+      </div>
+      <div class="hud-block">
+        <div class="label">HIGH SCORE</div>
+        <div id="high-score">00</div>
+      </div>
+      <div class="hud-block">
+        <div class="label">STAGE</div>
+        <div id="stage">1</div>
+      </div>
+    </header>
+
+    <div id="canvas-wrap">
+      <canvas id="game" width="448" height="576"></canvas>
+      <div id="overlay">
+        <div id="overlay-title">GALAGA</div>
+        <div id="overlay-sub">INSERT COIN</div>
+        <div id="overlay-hint">PRESS SPACE OR TAP TO START</div>
+        <div id="overlay-controls">
+          ← → / A D — MOVE · SPACE — FIRE<br />
+          BOSS TRACTOR BEAM CAN CAPTURE YOUR FIGHTER<br />
+          RESCUE IT WHILE DIVING FOR DUAL FIGHTER<br />
+          M — MUTE
+        </div>
+      </div>
+    </div>
+
+    <footer id="footer">
+      <div id="lives"></div>
+      <div id="stage-icons"></div>
+    </footer>
+
+    <div id="mobile-controls" aria-label="Touch controls">
+      <div class="mobile-col">
+        <button type="button" id="btn-left" class="mobile-btn" aria-label="Left">◀</button>
+      </div>
+      <div class="mobile-col mid">
+        <button type="button" id="btn-fire" class="mobile-btn fire" aria-label="Fire">FIRE</button>
+      </div>
+      <div class="mobile-col">
+        <button type="button" id="btn-right" class="mobile-btn" aria-label="Right">▶</button>
+      </div>
+      <div class="mobile-col side">
+        <button type="button" id="btn-pause" class="mobile-btn" aria-label="Pause">❚❚</button>
+        <button type="button" id="btn-mute" class="mobile-btn" aria-label="Mute">♪</button>
+      </div>
+    </div>
+  </div>
+  <script src="game.js?v=1"></script>
+</body>
+</html>
