@@ -11,12 +11,17 @@
   const ctx = canvas.getContext("2d", { alpha: false });
   if (!ctx) return;
 
-  // Classic-ish vertical cabinet ratio (scaled 2× from ~224×288)
+  // Logical playfield (game math). Display is 2× via SCALE + CSS.
   const VW = 448;
   const VH = 576;
-  canvas.width = VW;
-  canvas.height = VH;
-  document.documentElement.style.setProperty("--board-w", VW + "px");
+  const SCALE = 2;
+  canvas.width = VW * SCALE;
+  canvas.height = VH * SCALE;
+  document.documentElement.style.setProperty("--board-w", VW * SCALE + "px");
+  document.documentElement.style.setProperty("--board-h", VH * SCALE + "px");
+  document.documentElement.style.setProperty("--aspect-w", String(VW));
+  document.documentElement.style.setProperty("--aspect-h", String(VH));
+  ctx.imageSmoothingEnabled = false;
 
   const overlay = document.getElementById("overlay");
   const $title = document.getElementById("overlay-title");
@@ -1252,6 +1257,9 @@
   }
 
   function render() {
+    // 2× crisp pixels; all draw code stays in logical VW×VH space
+    ctx.setTransform(SCALE, 0, 0, SCALE, 0, 0);
+    ctx.imageSmoothingEnabled = false;
     fillRect(0, 0, VW, VH, C.black);
     drawStars();
     drawBeams();
