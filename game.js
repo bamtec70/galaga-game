@@ -260,7 +260,7 @@
         x: Math.random() * VW,
         y: Math.random() * VH,
         s: chance(0.25) ? 2 : 1,
-        sp: 20 + Math.random() * 60,
+        sp: 12 + Math.random() * 28,
         c: chance(0.2) ? C.cyan : chance(0.1) ? C.yellow : C.white,
       });
     }
@@ -389,20 +389,16 @@
     const midX = fromLeft ? VW * 0.25 : VW * 0.75;
     const midY = 40 + rnd(0, 80);
     const pts = [];
-    const steps = 40;
+    const steps = 64; // denser path = smoother, slower with stepMs
     for (let i = 0; i <= steps; i++) {
       const t = i / steps;
-      // quadratic bezier start -> mid -> dest
       const x = (1 - t) * (1 - t) * startX + 2 * (1 - t) * t * midX + t * t * dest.x;
       const y = (1 - t) * (1 - t) * startY + 2 * (1 - t) * t * midY + t * t * dest.y;
       pts.push({ x, y });
     }
-    // loop-ish overshoot near end
     if (chance(0.5)) {
-      const lx = dest.x + (fromLeft ? 40 : -40);
-      const ly = dest.y - 30;
-      for (let i = 1; i <= 12; i++) {
-        const t = i / 12;
+      for (let i = 1; i <= 20; i++) {
+        const t = i / 20;
         const a = t * Math.PI;
         pts.push({
           x: dest.x + Math.cos(a) * (fromLeft ? 35 : -35) * (1 - t),
@@ -419,28 +415,29 @@
     const sx = e.x;
     const sy = e.y;
     const targetX = player ? player.x + rnd(-40, 40) : VW / 2;
-    // leave formation upward loop then dive
-    for (let i = 0; i <= 15; i++) {
-      const t = i / 15;
+    const side = e.slot.col < 5 ? -1 : 1;
+    // leave formation with a deliberate loop
+    for (let i = 0; i <= 24; i++) {
+      const t = i / 24;
       const a = t * Math.PI;
       pts.push({
-        x: sx + Math.sin(a) * 40 * (e.slot.col < 5 ? -1 : 1),
-        y: sy - Math.sin(a) * 30,
+        x: sx + Math.sin(a) * 42 * side,
+        y: sy - Math.sin(a) * 28,
       });
     }
-    // dive toward player area
-    const midY = VH * 0.55;
-    for (let i = 1; i <= 25; i++) {
-      const t = i / 25;
+    // wavy dive toward player (arcade-readable curves)
+    const midY = VH * 0.52;
+    for (let i = 1; i <= 40; i++) {
+      const t = i / 40;
       pts.push({
-        x: lerp(sx, targetX, t) + Math.sin(t * Math.PI * 2) * 30,
+        x: lerp(sx, targetX, t) + Math.sin(t * Math.PI * 2) * 28,
         y: lerp(sy, midY, t),
       });
     }
-    // bottom sweep
+    // exit sweep
     const exitX = chance(0.5) ? -40 : VW + 40;
-    for (let i = 1; i <= 20; i++) {
-      const t = i / 20;
+    for (let i = 1; i <= 32; i++) {
+      const t = i / 32;
       pts.push({
         x: lerp(targetX, exitX, t),
         y: lerp(midY, VH + 40, t * 0.85 + 0.15),
@@ -462,7 +459,7 @@
     eBullets = [];
     beams = [];
     particles = [];
-    diveTimer = 2500;
+    diveTimer = 3800;
     fireCD = 0;
     challengeHits = 0;
     challengeShots = 0;
@@ -512,7 +509,7 @@
       // Stagger entry in convoy groups
       slots.forEach((slot, idx) => {
         const group = Math.floor(idx / 4);
-        enemies.push(makeEnemy(slot.type, slot, group * 700 + (idx % 4) * 90));
+        enemies.push(makeEnemy(slot.type, slot, group * 950 + (idx % 4) * 140));
       });
       // If we have a captive from before, attach to a boss once formed
       state = "intro";
@@ -585,13 +582,13 @@
     const maxShots = dual ? 4 : 2;
     const mine = bullets.filter((b) => b.friendly).length;
     if (mine >= maxShots) return;
-    fireCD = 120;
+    fireCD = 170;
     if (isChallenge) challengeShots++;
     if (dual) {
-      bullets.push({ x: player.x - 10, y: player.y - 12, vy: -420, friendly: true });
-      bullets.push({ x: player.x + 10, y: player.y - 12, vy: -420, friendly: true });
+      bullets.push({ x: player.x - 10, y: player.y - 12, vy: -230, friendly: true });
+      bullets.push({ x: player.x + 10, y: player.y - 12, vy: -230, friendly: true });
     } else {
-      bullets.push({ x: player.x, y: player.y - 12, vy: -420, friendly: true });
+      bullets.push({ x: player.x, y: player.y - 12, vy: -230, friendly: true });
     }
     sfx("fire");
   }
@@ -693,7 +690,8 @@
     if (!player || !player.alive) return;
     const left = leftHeld || keys.ArrowLeft || keys.KeyA || keys.a || keys.A;
     const right = rightHeld || keys.ArrowRight || keys.KeyD || keys.d || keys.D;
-    const spd = 210;
+    // Arcade-paced lateral speed (~original feel at 448px wide)
+    const spd = 118;
     if (left) player.x -= spd * (dt / 1000);
     if (right) player.x += spd * (dt / 1000);
     const margin = dual ? 22 : 14;
@@ -704,9 +702,9 @@
   }
 
   function updateEnemies(dt) {
-    formSway += formSwayDir * 18 * (dt / 1000);
-    if (formSway > 22) formSwayDir = -1;
-    if (formSway < -22) formSwayDir = 1;
+    formSway += formSwayDir * 7.5 * (dt / 1000);
+    if (formSway > 16) formSwayDir = -1;
+    if (formSway < -16) formSwayDir = 1;
 
     let inFormation = 0;
 
@@ -730,7 +728,7 @@
 
       if (e.state === "enter") {
         e.pathT += dt;
-        const stepMs = 28;
+        const stepMs = 52; // slower convoy entry (arcade pace)
         while (e.pathT >= stepMs && e.pathI < e.path.length - 1) {
           e.pathT -= stepMs;
           e.pathI++;
@@ -754,8 +752,8 @@
       } else if (e.state === "form") {
         inFormation++;
         const fp = slotPos(e.slot, formSway);
-        e.x = lerp(e.x, fp.x, 0.15);
-        e.y = lerp(e.y, fp.y, 0.15);
+        e.x = lerp(e.x, fp.x, 0.07);
+        e.y = lerp(e.y, fp.y, 0.07);
         e.angle = Math.PI / 2;
       } else if (e.state === "dive" || e.state === "beam") {
         if (!e.divePath || !e.divePath.length) {
@@ -763,7 +761,7 @@
           continue;
         }
         e.diveT += dt;
-        const stepMs = 22;
+        const stepMs = 40; // slower dives — readable arcade curves
         while (e.diveT >= stepMs && e.diveI < e.divePath.length - 1) {
           e.diveT -= stepMs;
           e.diveI++;
@@ -841,12 +839,12 @@
         // Shoot while diving
         e.shootT -= dt;
         if (e.shootT <= 0 && player && player.alive && e.y < VH - 80) {
-          e.shootT = 500 + Math.random() * 800 - Math.min(300, stage * 20);
+          e.shootT = 1000 + Math.random() * 1200 - Math.min(250, stage * 15);
           eBullets.push({
             x: e.x,
             y: e.y + 8,
-            vx: (player.x - e.x) * 0.15,
-            vy: 140 + stage * 5,
+            vx: (player.x - e.x) * 0.07,
+            vy: 78 + stage * 3,
           });
         }
 
@@ -876,7 +874,7 @@
       } else if (e.state === "challenge") {
         if (!e.challengeActive) continue;
         e.pathT += dt;
-        const stepMs = 26;
+        const stepMs = 48;
         while (e.pathT >= stepMs && e.pathI < e.path.length - 1) {
           e.pathT -= stepMs;
           e.pathI++;
@@ -900,7 +898,7 @@
       diveTimer -= dt;
       const formed = enemies.filter((e) => e.state === "form");
       if (diveTimer <= 0 && formed.length) {
-        diveTimer = Math.max(600, 2200 - stage * 80);
+        diveTimer = Math.max(1500, 3400 - stage * 55);
         // Pick divers
         const n = 1 + (chance(0.3 + stage * 0.02) ? 1 : 0);
         for (let k = 0; k < n; k++) {
@@ -1071,12 +1069,118 @@
     updateParticles(dt);
   }
 
-  // ── Draw ─────────────────────────────────────────────────────────────────
+  // ── Draw (detailed Namco-style pixel sprites) ────────────────────────────
   function fillRect(x, y, w, h, col) {
     ctx.fillStyle = col;
     ctx.fillRect(x | 0, y | 0, w, h);
   }
 
+  // Palette index for sprite maps
+  const SP = {
+    _: null,
+    W: "#ffffff",
+    w: "#c8c8d8",
+    R: "#ff3030",
+    r: "#c02020",
+    B: "#3060ff",
+    b: "#1838c0",
+    Y: "#ffff40",
+    y: "#c8c020",
+    G: "#30e030",
+    g: "#189818",
+    L: "#80ff80",
+    C: "#40ffff",
+    c: "#2080a0",
+    O: "#ff8800",
+    M: "#ff60a0",
+    K: "#101018",
+  };
+
+  /** Draw a row-string sprite. Chars map via SP. px = pixel size. */
+  function blit(ox, oy, rows, px, flipX) {
+    const h = rows.length;
+    const w = rows[0].length;
+    const x0 = ox - (w * px) / 2;
+    const y0 = oy - (h * px) / 2;
+    for (let j = 0; j < h; j++) {
+      const row = rows[j];
+      for (let i = 0; i < w; i++) {
+        const ch = row[flipX ? w - 1 - i : i];
+        const col = SP[ch];
+        if (!col) continue;
+        fillRect(x0 + i * px, y0 + j * px, px, px, col);
+      }
+    }
+  }
+
+  // Fighter (Gyaraga) — classic white ship with blue body / red thrusters
+  const SPR_FIGHTER = [
+    "......W......",
+    ".....WWW.....",
+    "....WYWyw....",
+    "....WWWWW....",
+    "...WBBBBBW...",
+    "..WBwWWWwBW..",
+    ".WR.WWWWW.RW.",
+    ".R..WwWwW..R.",
+    "....R...R....",
+  ];
+  // Captured fighter (red-tinted)
+  const SPR_CAPTURED = [
+    "......R......",
+    ".....RRR.....",
+    "....RrRrR....",
+    "....RRRRR....",
+    "...RwwwwwR...",
+    "..RwRRRRRwR..",
+    ".RR.RRRRR.RR.",
+    ".R..RrRrR..R.",
+    "....R...R....",
+  ];
+  // Bee / Zako — blue body, yellow face, wing frames
+  const SPR_BEE_A = [
+    "..bb...bb..",
+    ".bBBb.bBBb.",
+    "..BYBYBYB..",
+    ".BBWWWWWBB.",
+    "bBBYYYYBBBb",
+    ".BBBYYYBBB.",
+    "..B.YYY.B..",
+    "....YYY....",
+    ".....Y.....",
+  ];
+  const SPR_BEE_B = [
+    "b.bb...bb.b",
+    ".bBBb.bBBb.",
+    "..BYBYBYB..",
+    ".BBWWWWWBB.",
+    ".BBYYYYYBB.",
+    "..BBYYYBB..",
+    "...BYYYB...",
+    "....YYY....",
+    ".....Y.....",
+  ];
+  // Butterfly / Goei — red core, pink/white wings
+  const SPR_BUTTER_A = [
+    "MM.......MM",
+    "MMrR...RrMM",
+    ".MrWRWRWrM.",
+    "..RWWWWWR..",
+    ".RRWYWYWRR.",
+    "RR.RWRWR.RR",
+    "R...RRR...R",
+    ".....R.....",
+  ];
+  const SPR_BUTTER_B = [
+    ".MM.....MM.",
+    "MMrR...RrMM",
+    "MMrWRWRWrMM",
+    ".RRWWWWWRR.",
+    "..RWYWYWR..",
+    ".R.RWRWR.R.",
+    "R...RRR...R",
+    ".....R.....",
+  ];
   function drawStars() {
     for (const s of stars) {
       fillRect(s.x, s.y, s.s, s.s, s.c);
@@ -1085,133 +1189,91 @@
 
   function drawPlayer() {
     if (!player || !player.alive) return;
-    if (invuln > 0 && ((invuln / 60) | 0) % 2 === 0) return;
+    if (invuln > 0 && ((invuln / 70) | 0) % 2 === 0) return;
     const x = player.x;
     const y = player.y;
-
-    function ship(ox) {
-      // White fighter with red/blue accents (Galaga-like)
-      ctx.fillStyle = C.white;
-      ctx.beginPath();
-      ctx.moveTo(ox, y - 14);
-      ctx.lineTo(ox - 10, y + 10);
-      ctx.lineTo(ox - 4, y + 6);
-      ctx.lineTo(ox, y + 10);
-      ctx.lineTo(ox + 4, y + 6);
-      ctx.lineTo(ox + 10, y + 10);
-      ctx.closePath();
-      ctx.fill();
-      fillRect(ox - 2, y - 4, 4, 8, C.shipBlue);
-      fillRect(ox - 8, y + 4, 4, 4, C.shipRed);
-      fillRect(ox + 4, y + 4, 4, 4, C.shipRed);
-      fillRect(ox - 1, y - 12, 2, 6, C.yellow);
-    }
-
     if (dual) {
-      ship(x - 12);
-      ship(x + 12);
+      blit(x - 14, y, SPR_FIGHTER, 1.15);
+      blit(x + 14, y, SPR_FIGHTER, 1.15);
     } else {
-      ship(x);
+      blit(x, y, SPR_FIGHTER, 1.2);
     }
   }
 
   function drawEnemy(e) {
     if (e.state === "dead") return;
-    if (e.x < -40 || e.x > VW + 40 || e.y < -40) return;
+    if (e.x < -50 || e.x > VW + 50 || e.y < -50) return;
     const x = e.x;
     const y = e.y;
-    const flap = Math.sin(e.flap / 80) * 3;
+    const frame = ((e.flap / 180) | 0) % 2;
 
     ctx.save();
     ctx.translate(x, y);
-    // Point roughly along velocity when diving
     if (e.state === "dive" || e.state === "beam" || e.state === "challenge" || e.state === "enter") {
       ctx.rotate(e.angle + Math.PI / 2);
     }
 
     if (e.type === "bee") {
-      // Blue/yellow bee
-      ctx.fillStyle = C.bee;
-      ctx.beginPath();
-      ctx.arc(0, 0, 8, 0, Math.PI * 2);
-      ctx.fill();
-      fillRect(-3, -3, 6, 6, C.yellow);
-      ctx.fillStyle = C.beeWing;
-      ctx.fillRect(-12, -2 + flap, 6, 4);
-      ctx.fillRect(6, -2 - flap, 6, 4);
-      fillRect(-2, 4, 4, 4, C.white);
+      blit(0, 0, frame ? SPR_BEE_B : SPR_BEE_A, 1.15);
     } else if (e.type === "butterfly") {
-      // Red butterfly
-      ctx.fillStyle = C.butter;
-      ctx.beginPath();
-      ctx.moveTo(0, -8);
-      ctx.lineTo(10, 0);
-      ctx.lineTo(0, 8);
-      ctx.lineTo(-10, 0);
-      ctx.closePath();
-      ctx.fill();
-      ctx.fillStyle = C.butterWing;
-      ctx.save();
-      ctx.translate(-10, flap);
-      ctx.scale(1, 0.6);
-      ctx.beginPath();
-      ctx.arc(0, 0, 8, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.restore();
-      ctx.save();
-      ctx.translate(10, -flap);
-      ctx.scale(1, 0.6);
-      ctx.beginPath();
-      ctx.arc(0, 0, 8, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.restore();
-      fillRect(-2, -2, 4, 4, C.yellow);
+      blit(0, 0, frame ? SPR_BUTTER_B : SPR_BUTTER_A, 1.2);
     } else if (e.type === "boss") {
-      // Green boss Galaga
       const hurt = e.hp < 2;
-      ctx.fillStyle = hurt ? C.green : C.boss;
-      ctx.beginPath();
-      ctx.moveTo(0, -12);
-      ctx.lineTo(12, -4);
-      ctx.lineTo(10, 8);
-      ctx.lineTo(0, 12);
-      ctx.lineTo(-10, 8);
-      ctx.lineTo(-12, -4);
-      ctx.closePath();
-      ctx.fill();
-      fillRect(-4, -4, 8, 6, hurt ? C.orange : C.bossEye);
-      fillRect(-8, 2, 4, 4, C.green);
-      fillRect(4, 2, 4, 4, C.green);
-      // wings
-      ctx.fillStyle = C.lime || "#80ff80";
-      ctx.fillStyle = "#80ff80";
-      ctx.fillRect(-16, -2 + flap, 6, 5);
-      ctx.fillRect(10, -2 - flap, 6, 5);
-
+      drawBossSprite(0, 0, hurt, frame);
       if (e.hasCaptive) {
-        // Captured fighter (red-tinted)
-        ctx.fillStyle = C.shipRed;
-        ctx.beginPath();
-        ctx.moveTo(0, 16);
-        ctx.lineTo(-7, 28);
-        ctx.lineTo(0, 24);
-        ctx.lineTo(7, 28);
-        ctx.closePath();
-        ctx.fill();
+        blit(0, 18, SPR_CAPTURED, 0.95);
       }
     }
 
     ctx.restore();
   }
 
+  function drawBossSprite(ox, oy, hurt, frame) {
+    // Detailed boss Galaga: dual pods, yellow eyes, green armor, wing flaps
+    const g = hurt ? "#ffb020" : "#28d828";
+    const g2 = hurt ? "#c07010" : "#189818";
+    const eye = hurt ? "#ff4040" : "#ffff40";
+    const wing = hurt ? "#ffd070" : "#70ff70";
+    const px = 1.2;
+    // outer wing panels
+    const wy = frame ? -1 : 1;
+    fillRect(ox - 16 * px, oy - 2 * px + wy, 5 * px, 3 * px, wing);
+    fillRect(ox + 11 * px, oy - 2 * px - wy, 5 * px, 3 * px, wing);
+    fillRect(ox - 15 * px, oy + 1 * px + wy, 4 * px, 2 * px, g2);
+    fillRect(ox + 11 * px, oy + 1 * px - wy, 4 * px, 2 * px, g2);
+    // body
+    fillRect(ox - 8 * px, oy - 6 * px, 16 * px, 12 * px, g);
+    fillRect(ox - 6 * px, oy - 8 * px, 12 * px, 3 * px, g2);
+    fillRect(ox - 5 * px, oy + 5 * px, 10 * px, 3 * px, g2);
+    // dual "mirror" heads
+    fillRect(ox - 9 * px, oy - 4 * px, 6 * px, 6 * px, g);
+    fillRect(ox + 3 * px, oy - 4 * px, 6 * px, 6 * px, g);
+    // eyes
+    fillRect(ox - 7 * px, oy - 2 * px, 3 * px, 3 * px, eye);
+    fillRect(ox + 4 * px, oy - 2 * px, 3 * px, 3 * px, eye);
+    fillRect(ox - 6 * px, oy - 1 * px, 1 * px, 1 * px, "#000");
+    fillRect(ox + 5 * px, oy - 1 * px, 1 * px, 1 * px, "#000");
+    // center jewel
+    fillRect(ox - 2 * px, oy + 1 * px, 4 * px, 3 * px, "#ffffff");
+    fillRect(ox - 1 * px, oy + 2 * px, 2 * px, 1 * px, eye);
+    // legs / thrusters
+    fillRect(ox - 5 * px, oy + 8 * px, 2 * px, 3 * px, g2);
+    fillRect(ox + 3 * px, oy + 8 * px, 2 * px, 3 * px, g2);
+    fillRect(ox - 1 * px, oy + 8 * px, 2 * px, 2 * px, wing);
+  }
+
   function drawBullets() {
     for (const b of bullets) {
-      fillRect(b.x - 1, b.y - 6, 3, 10, C.yellow);
-      fillRect(b.x - 1, b.y - 6, 3, 4, C.white);
+      // classic twin-pixel yellow missile
+      fillRect(b.x - 1, b.y - 7, 2, 10, "#ffff60");
+      fillRect(b.x - 1, b.y - 7, 2, 3, "#ffffff");
+      fillRect(b.x - 2, b.y - 1, 4, 2, "#c8c020");
     }
     for (const b of eBullets) {
-      fillRect(b.x - 2, b.y - 2, 4, 4, C.pink);
-      fillRect(b.x - 1, b.y - 1, 2, 2, C.white);
+      // Galaga-style enemy bomb (pink diamond)
+      fillRect(b.x - 1, b.y - 3, 2, 6, "#ff80c0");
+      fillRect(b.x - 2, b.y - 1, 4, 2, "#ff40a0");
+      fillRect(b.x - 1, b.y - 1, 2, 2, "#ffffff");
     }
   }
 
@@ -1220,22 +1282,28 @@
       if (!beam.enemy) continue;
       const x = beam.x;
       const y = beam.y;
-      const life = beam.life / 2200;
-      // Tractor cone
-      ctx.globalAlpha = 0.35 + 0.25 * Math.sin(performance.now() / 80);
-      ctx.fillStyle = C.cyan;
-      ctx.beginPath();
-      ctx.moveTo(x - 6, y + 8);
-      ctx.lineTo(x + 6, y + 8);
-      ctx.lineTo(x + 28 * life + 10, y + 150);
-      ctx.lineTo(x - 28 * life - 10, y + 150);
-      ctx.closePath();
-      ctx.fill();
-      ctx.strokeStyle = C.white;
-      ctx.globalAlpha = 0.5;
-      ctx.lineWidth = 1;
-      ctx.stroke();
+      const pulse = 0.5 + 0.5 * Math.sin(performance.now() / 90);
+      // Segmented tractor cone (arcade-like)
+      for (let i = 0; i < 10; i++) {
+        const t0 = i / 10;
+        const t1 = (i + 1) / 10;
+        const w0 = 4 + t0 * 36 * pulse;
+        const w1 = 4 + t1 * 36 * pulse;
+        const y0 = y + 10 + t0 * 150;
+        const y1 = y + 10 + t1 * 150;
+        ctx.globalAlpha = 0.15 + 0.12 * ((i % 2) + pulse);
+        ctx.fillStyle = i % 2 ? "#40ffff" : "#ffffff";
+        ctx.beginPath();
+        ctx.moveTo(x - w0, y0);
+        ctx.lineTo(x + w0, y0);
+        ctx.lineTo(x + w1, y1);
+        ctx.lineTo(x - w1, y1);
+        ctx.closePath();
+        ctx.fill();
+      }
       ctx.globalAlpha = 1;
+      // boss emitter glow
+      fillRect(x - 4, y + 6, 8, 4, "#80ffff");
     }
   }
 
@@ -1250,7 +1318,7 @@
   function drawMessages() {
     if (messageT > 0 && message) {
       ctx.fillStyle = C.yellow;
-      ctx.font = "10px \"Press Start 2P\", monospace";
+      ctx.font = '10px "Press Start 2P", monospace';
       ctx.textAlign = "center";
       ctx.fillText(message, VW / 2, VH * 0.55);
     }
