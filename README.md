@@ -52,6 +52,12 @@ Pilot your **fighter** at the bottom of the screen. Destroy the Galaga forces as
 | Boss | 150 | 400+ (escorts) |
 | Perfect challenge | | 10,000 |
 
+## Build V12
+
+Arcade-faithful pass (same bar as Dig Dug / Joust revisions):
+- **Audio:** Namco WSG-style Web Audio synthesis (shot, explosion, dive warble, tractor beam, capture, stage/attract fanfares) — no ROM dumps
+- **Graphics:** redrawn pixel sprites for fighter, bee, butterfly, Boss Galaga (green?blue when hit), layered starfield, explosion bloom rings
+
 ## Files
 
 - `index.html` â€” shell  
