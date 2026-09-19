@@ -197,3 +197,68 @@ html, body {
     font-size: 15px;
   }
 }
+
+/* === Dual orientation (portrait + landscape) === */
+@media (orientation: portrait) and (max-width: 900px) {
+  html, body {
+    height: 100%;
+    height: 100dvh;
+    overflow: hidden;
+  }
+  #game-wrapper {
+    max-height: 100dvh;
+    overflow: hidden;
+    justify-content: flex-start;
+    gap: 4px;
+    padding: 4px;
+    padding-bottom: max(4px, env(safe-area-inset-bottom));
+  }
+  #canvas-wrap, #hud, #footer, #mobile-controls {
+    width: min(100vw - 8px, calc((100dvh - 210px) * 0.9)) !important;
+    max-width: 100vw;
+  }
+  #game {
+    width: 100% !important;
+    height: auto !important;
+    max-height: calc(100dvh - 210px) !important;
+  }
+  #mobile-controls {
+    display: flex !important;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 520px) {
+  html, body {
+    height: 100%;
+    height: 100dvh;
+    overflow: hidden;
+  }
+  #game-wrapper {
+    max-height: 100dvh;
+    overflow: hidden;
+    gap: 2px;
+    padding: 2px 4px;
+    padding-left: max(4px, env(safe-area-inset-left));
+    padding-right: max(4px, env(safe-area-inset-right));
+  }
+  #canvas-wrap {
+    width: min(70vw, calc((100dvh - 12px) * 1.2), 100vw - 140px) !important;
+  }
+  #game {
+    max-height: calc(100dvh - 12px) !important;
+  }
+  #hud, #footer {
+    font-size: 10px;
+  }
+  #mobile-controls {
+    display: flex !important;
+  }
+  .mobile-btn, .dpad-btn {
+    min-width: 42px !important;
+    width: 42px !important;
+    height: 42px !important;
+    font-size: 12px !important;
+  }
+}
