@@ -7,9 +7,9 @@
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="theme-color" content="#000008" />
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-  <title>GALAGA - Namco 1981 (Build V29)</title>
+  <title>GALAGA - Namco 1981 (Build V30)</title>
   <!-- New filenames force browsers past stale caches -->
-  <link rel="stylesheet" href="galaga-v29.css?v=galaga-v29" />
+  <link rel="stylesheet" href="galaga-v30.css?v=galaga-v30" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
@@ -22,33 +22,31 @@
       <div id="overlay">
         <div id="overlay-title">GALAGA</div>
         <div id="overlay-sub">INSERT COIN</div>
-        <div id="overlay-hint">BUILD V29 - PRESS SPACE OR TAP</div>
+        <div id="overlay-hint">BUILD V30 - PRESS SPACE OR TAP</div>
         <div id="overlay-controls">
           LEFT/RIGHT / A D - MOVE · SPACE - FIRE<br />
           BOSS TRACTOR BEAM CAPTURES YOUR FIGHTER<br />
           SHOOT THE DIVING BOSS TO RESCUE · DUAL FIGHTER<br />
           FORMATION KILL WITH CAPTIVE · HOSTILE SHIP<br />
-          M - MUTE · MUST SEE "BUILD V29"
+          M - MUTE · MUST SEE "BUILD V30"
         </div>
       </div>
     </div>
 
     <div id="mobile-controls" aria-label="Touch controls">
-      <div class="mobile-col">
+      <div class="mobile-col v30-left">
         <button type="button" id="btn-left" class="mobile-btn" aria-label="Left">◀</button>
-      </div>
-      <div class="mobile-col mid">
-        <button type="button" id="btn-fire" class="mobile-btn fire" aria-label="Fire">FIRE</button>
-      </div>
-      <div class="mobile-col">
         <button type="button" id="btn-right" class="mobile-btn" aria-label="Right">▶</button>
       </div>
-      <div class="mobile-col side">
+      <div class="mobile-col v30-mid">
         <button type="button" id="btn-pause" class="mobile-btn" aria-label="Pause">Ⅱ</button>
         <button type="button" id="btn-mute" class="mobile-btn" aria-label="Mute">♪</button>
       </div>
+      <div class="mobile-col v30-right">
+        <button type="button" id="btn-fire" class="mobile-btn fire" aria-label="Fire">FIRE</button>
+      </div>
     </div>
   </div>
-  <script src="galaga-v29.js"></script>
+  <script src="galaga-v30.js"></script>
 </body>
 </html>
