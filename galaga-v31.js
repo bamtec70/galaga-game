@@ -1371,10 +1371,10 @@
     msgLines = lines;
   }
   function iniMove(d) { if (!ini) return; ini.cur = (ini.cur + d + HS_CHARS.length) % HS_CHARS.length; ini.idle = 0; drawInitials(); }
-  function iniSet(ch) { if (!ini) return; const k = HS_CHARS.indexOf(ch); if (k >= 0) { ini.cur = k; iniConfirm(); } }
+  function iniSet(ch) { if (!ini || ini.t < 500) return; const k = HS_CHARS.indexOf(ch); if (k >= 0) { ini.cur = k; iniConfirm(); } }
   function iniBack() { if (!ini || !ini.letters.length) return; ini.cur = Math.max(0, HS_CHARS.indexOf(ini.letters.pop())); drawInitials(); }
   function iniConfirm() {
-    if (!ini) return;
+    if (!ini || ini.t < 500) return; /* v31.2: a fire tap/Space mashed as the game ended must not eat initial 1 */
     ini.letters.push(HS_CHARS[ini.cur]);
     ini.idle = 0;
     if (ini.letters.length >= 3) { finishInitials(); return; }
