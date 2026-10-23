@@ -485,6 +485,37 @@
     vsched(1, seconds, 0, 0, 4, false);
   }
 
+  // -- Audio unlock (sound ON by default): first tap/click/key anywhere resumes Web Audio --
+  (function () {
+    function silentWav() {
+      const n = 800, b = new Uint8Array(44 + n), v = new DataView(b.buffer);
+      const s = (o, t) => { for (let i = 0; i < t.length; i++) b[o + i] = t.charCodeAt(i); };
+      s(0, "RIFF"); v.setUint32(4, 36 + n, true); s(8, "WAVEfmt "); v.setUint32(16, 16, true);
+      v.setUint16(20, 1, true); v.setUint16(22, 1, true); v.setUint32(24, 8000, true); v.setUint32(28, 8000, true);
+      v.setUint16(32, 1, true); v.setUint16(34, 8, true); s(36, "data"); v.setUint32(40, n, true); b.fill(128, 44);
+      let str = ""; for (let i = 0; i < b.length; i++) str += String.fromCharCode(b[i]);
+      return "data:audio/wav;base64," + btoa(str);
+    }
+    let tag = null, kicked = null;
+    function onGesture() {
+      try { if (navigator.audioSession && navigator.audioSession.type !== "playback") navigator.audioSession.type = "playback"; } catch (_) {}
+      try { if (!tag) { tag = new Audio(silentWav()); tag.setAttribute("playsinline", ""); tag.loop = true; tag.volume = 0.01; } if (tag.paused) { const p = tag.play(); if (p && p.catch) p.catch(function () {}); } } catch (_) {}
+      try { unlockAudio(); } catch (_) {}
+      try {
+        const c = AC;
+        if (c) {
+          if (c.state !== "running" && c.resume) c.resume().catch(function () {});
+          if (kicked !== c) { kicked = c; const sb = c.createBuffer(1, 1, 22050), src = c.createBufferSource(); src.buffer = sb; src.connect(c.destination); src.start(0); }
+        }
+      } catch (_) {}
+    }
+    ["pointerdown", "touchstart", "touchend", "mousedown", "click", "keydown"].forEach(function (t) {
+      window.addEventListener(t, onGesture, { capture: true, passive: true });
+    });
+    document.addEventListener("visibilitychange", function () { if (!document.hidden) { try { const c = AC; if (c && c.state === "suspended") c.resume().catch(function () {}); } catch (_) {} } });
+    window.__audioInfo = function () { const c = AC; return { ctx: c ? c.state : "none", muted: muted }; };
+  })();
+
   function sfx(name) {
     if (demo) return; // V30: attract mode is silent
     unlockAudio();
