@@ -1173,7 +1173,7 @@
   function gameOver() {
     if (demo) { attractPhase("heroes"); return; } // V30: demo never enters initials
     if (state === "over") return;
-    state = "over";
+    state = "over"; if (window.WTPShare) WTPShare.show(score);
     overReady = false;
     fighterCount = 0;
     if (player) player.alive = false;
@@ -2468,6 +2468,7 @@
   }
 
   function beginGame() {
+    if (window.WTPShare) WTPShare.hide();
     const kick = () => {
       score = 0;
       lives = 3;
